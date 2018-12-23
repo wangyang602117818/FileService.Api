@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
 using System;
 using System.IdentityModel.Tokens.Jwt;
+using System.Net;
 using System.Security.Claims;
 using System.Text;
 
@@ -44,6 +45,13 @@ namespace FileService.Api.Controllers
             string tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
             return new ResponseItem<string>(ErrorCode.success, tokenStr);
         }
-
+        [HttpGet]
+        [AllowAnonymous]
+        public IActionResult WeChatLogin(string code)
+        {
+            string url = AppSettings.Configuration["weChat:openIdUrl"] + "?appid=" + AppSettings.Configuration["weChat:appId"] + "&secret=" + AppSettings.Configuration["weChat:appSecret"] + "&js_code=" + code + "&grant_type=authorization_code";
+            string result = new HttpRequestHelper().Get(url).Result;
+            return Content(result,"application/json");
+        }
     }
 }
