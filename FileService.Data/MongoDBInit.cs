@@ -31,43 +31,55 @@ namespace FileService.Data
                 database.CreateCollection("Extension");
                 List<BsonDocument> list = new List<BsonDocument>()
                 {
-                    new BsonDocument(){{"Extension",".jpg"},{"Type","image"},{"Action","allow"},{"Description","image"},
-                      {"CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".png"},{"Type","image"},{"Action","allow"},{"Description","image" }, { "CreateTime", DateTime.Now } },
-                    new BsonDocument(){{"Extension",".gif"},{"Type","image"},{"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
-                    new BsonDocument(){{"Extension", ".bmp"},{"Type","image"},{"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
-                    new BsonDocument(){{"Extension",".mp4"},{"Type","video"},{"Action","allow"},{"Description","video"}, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".avi"},{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".wmv"},{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".mov"},{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".mkv"},{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".flv" },{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".rm"},{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".rmvb"},{"Type","video"},{"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".m3u8" },{"Type","video"},{"Action","allow"},{"Description", "HTTP Live Streaming" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension",".doc" },{"Type","office"},{"Action","allow"},{"Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".docx" },{"Type", "office" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".xls" },{"Type", "office" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".xlsx" },{"Type", "office" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".ppt" },{"Type", "office" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".pptx" },{"Type", "office" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".txt" },{"Type", "text" }, { "Action","allow"}, { "Description", "text" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".js" },{"Type", "text" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".htm" },{"Type", "text" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".html" },{"Type", "text" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".css" },{"Type", "text" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".zip" },{"Type", "attachment" }, { "Action","allow"}, { "Description", "compress" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".rar" },{"Type", "attachment" }, { "Action","allow"}, { "Description", "compress" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".pdf" },{"Type", "pdf" }, { "Action","allow"}, { "Description", "Portable Document Format" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".odg" },{"Type", "office" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".ods" },{"Type", "office" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".odp" },{"Type", "office" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".odf" },{"Type", "office" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".odt" },{"Type", "office" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".wps" },{"Type", "office" }, { "Action","allow"}, { "Description", "wpsoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".et" },{"Type", "office" }, { "Action","allow"}, { "Description", "wpsoffice" }, { "CreateTime", DateTime.Now }},
-                    new BsonDocument(){{"Extension", ".dps" },{"Type", "office" }, { "Action","allow"}, { "Description", "wpsoffice" }, { "CreateTime", DateTime.Now }},
-                     new BsonDocument(){{"Extension", ".exe" },{"Type", "attachment" }, { "Action","block"}, { "Description", "executable file" }, { "CreateTime", DateTime.Now }}
+                    new BsonDocument(){{"Extension",".jpg"},{"Type","image"}, { "ContentType","image/jpeg"}, {"Action","allow"},{"Description","image"},{"CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".png"},{"Type","image"}, { "ContentType", "image/png" }, {"Action","allow"},{"Description","image" }, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension",".gif"},{"Type","image"}, { "ContentType", "image/gif" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension", ".bmp"},{"Type","image"}, { "ContentType", "application/x-bmp" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension", ".jpeg"},{"Type","image"}, { "ContentType", "image/jpeg" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension", ".pic"},{"Type","image"}, { "ContentType", "application/x-pic" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension", ".ico"},{"Type","image"}, { "ContentType", "image/x-icon" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension", ".tif"},{"Type","image"}, { "ContentType", "image/tiff" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+                    new BsonDocument(){{"Extension", ".svg"},{"Type","image"}, { "ContentType", "image/svg+xml" }, {"Action","allow"},{"Description","image"}, { "CreateTime", DateTime.Now } },
+
+                    new BsonDocument(){{"Extension", ".mp3"},{"Type","audio"}, { "ContentType", "audio/mpeg" }, {"Action","allow"},{"Description", "audio" }, { "CreateTime", DateTime.Now } },
+
+                    new BsonDocument(){{"Extension",".mp4"},{"Type","video"}, { "ContentType", "video/mp4" }, {"Action","allow"},{"Description","video"}, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".avi"},{"Type","video"}, { "ContentType", "video/avi" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".wmv"},{"Type","video"}, { "ContentType", "video/x-ms-wmv" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".mov"},{"Type","video"}, { "ContentType", "video/quicktime" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".mkv"},{"Type","video"}, { "ContentType", "video/mkv" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".flv" },{"Type","video"}, { "ContentType", "video/x-flv" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".rm"},{"Type","video"}, { "ContentType", "application/vnd.rn-realmedia" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".rmvb"},{"Type","video"}, { "ContentType", "application/vnd.rn-realmedia-vbr" }, {"Action","allow"},{"Description", "video" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension",".m3u8" },{"Type","video"}, { "ContentType", "application/x-mpegURL" }, {"Action","allow"},{"Description", "HTTP Live Streaming" }, { "CreateTime", DateTime.Now }},
+
+                    new BsonDocument(){{"Extension",".doc" },{"Type","office"}, { "ContentType", "application/msword" }, {"Action","allow"},{"Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".docx" },{"Type", "office" }, { "ContentType", "application/vnd.openxmlformats-officedocument.wordprocessingml.document" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".xls" },{"Type", "office" }, { "ContentType", "application/vnd.ms-excel" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".xlsx" },{"Type", "office" }, { "ContentType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".ppt" },{"Type", "office" }, { "ContentType", "application/vnd.ms-powerpoint" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".pptx" },{"Type", "office" }, { "ContentType", "application/vnd.openxmlformats-officedocument.presentationml.presentation" }, { "Action","allow"}, { "Description", "microsoft office" }, { "CreateTime", DateTime.Now }},
+
+                    new BsonDocument(){{"Extension", ".txt" },{"Type", "text" },{ "ContentType", "text/plain" }, { "Action","allow"}, { "Description", "text" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".js" },{"Type", "text" }, { "ContentType", "application/javascript" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".htm" },{"Type", "text" }, { "ContentType", "text/html" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".html" },{"Type", "text" }, { "ContentType", "text/html" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".css" },{"Type", "text" }, { "ContentType", "text/css" }, { "Action","allow"}, { "Description", "code" }, { "CreateTime", DateTime.Now }},
+
+                    new BsonDocument(){{"Extension", ".zip" }, {"Type", "attachment" },{ "ContentType", "application/x-zip-compressed" }, { "Action","allow"}, { "Description", "compress" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".rar" },{"Type", "attachment" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "compress" }, { "CreateTime", DateTime.Now }},
+
+                    new BsonDocument(){{"Extension", ".pdf" },{"Type", "pdf" }, { "ContentType", "application/pdf" }, { "Action","allow"}, { "Description", "Portable Document Format" }, { "CreateTime", DateTime.Now }},
+
+                    new BsonDocument(){{"Extension", ".odg" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".ods" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".odp" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".odf" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".odt" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "libreoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".wps" },{"Type", "office" }, { "ContentType", "application/vnd.ms-works" }, { "Action","allow"}, { "Description", "wpsoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".et" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "wpsoffice" }, { "CreateTime", DateTime.Now }},
+                    new BsonDocument(){{"Extension", ".dps" },{"Type", "office" }, { "ContentType", "application/octet-stream" }, { "Action","allow"}, { "Description", "wpsoffice" }, { "CreateTime", DateTime.Now }},
+                     new BsonDocument(){{"Extension", ".exe" },{"Type", "attachment" }, { "ContentType", "application/octet-stream" }, { "Action","block"}, { "Description", "executable file" }, { "CreateTime", DateTime.Now }}
                 };
                 database.GetCollection<BsonDocument>("Extension").InsertMany(list);
             }
@@ -128,11 +140,11 @@ namespace FileService.Data
                 var c = new CreateIndexModel<BsonDocument>(new BsonDocument() { { "From", 1 }, { "CreateTime", 1 } });  //shared key
                 database.GetCollection<BsonDocument>("FilePreview").Indexes.CreateOne(c);
             }
-            if (!databases.Contains("FilePreviewBig"))
+            if (!databases.Contains("FilePreviewMobile"))
             {
-                database.CreateCollection("FilePreviewBig");
+                database.CreateCollection("FilePreviewMobile");
                 var c = new CreateIndexModel<BsonDocument>(new BsonDocument() { { "From", 1 }, { "CreateTime", 1 } });  //shared key
-                database.GetCollection<BsonDocument>("FilePreviewBig").Indexes.CreateOne(c);
+                database.GetCollection<BsonDocument>("FilePreviewMobile").Indexes.CreateOne(c);
             }
             if (!databases.Contains("Thumbnail"))
             {

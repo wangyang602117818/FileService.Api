@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace FileService.Api.Controllers
@@ -16,7 +17,7 @@ namespace FileService.Api.Controllers
     public class FilesController : ControllerBase
     {
         FilesWrap filesWrap = new FilesWrap();
-        FilePreview filePreview = new FilePreview();
+        FilePreviewMobile filePreviewMobile = new FilePreviewMobile();
         Extension extension = new Extension();
         private readonly IHostingEnvironment _hostingEnvironment;
         public FilesController(IHostingEnvironment hostingEnvironment)
@@ -32,12 +33,12 @@ namespace FileService.Api.Controllers
             IEnumerable<BsonDocument> result = filesWrap.GetPageList(pageIndex, pageSize, new BsonDocument("Delete", false), timeStart, timeEnd, sorts, filter, new List<string>() { "FileName" }, new List<string>() { }, out count, User.Identity.Name);
             return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result, count);
         }
-        [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        //[ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
         public ActionResult GetFileIcon(string id)
         {
-            BsonDocument file = filePreview.FindOne(ObjectId.Parse(id.Split('.')[0]));
+            BsonDocument file = filePreviewMobile.FindOne(ObjectId.Parse(id.Split('.')[0]));
             string imagePath = _hostingEnvironment.WebRootPath + "\\images\\";
-            string ext = "." + id.Split('.')[1].TrimEnd('/');
+            string ext = "." + id.Split('.')[1].TrimEnd('/').ToLower();
             if (file == null)
             {
                 string type = extension.GetTypeByExtension(ext).ToLower();
@@ -47,25 +48,27 @@ namespace FileService.Api.Controllers
                     case "video":
                     case "image":
                     case "attachment":
+                    case "audio":
                     case "pdf":
-                        return File(System.IO.File.ReadAllBytes(imagePath + type + ".png"), "application/octet-stream");
+                        return File(System.IO.File.ReadAllBytes(imagePath + type + ".png"), "image/png");
                     case "office":
                         if (ext == ".doc" || ext == ".docx")
-                            return File(System.IO.File.ReadAllBytes(imagePath + "word.png"), "application/octet-stream");
+                            return File(System.IO.File.ReadAllBytes(imagePath + "word.png"), "image/png");
                         if (ext == ".xls" || ext == ".xlsx")
-                            return File(System.IO.File.ReadAllBytes(imagePath + "excel.png"), "application/octet-stream");
+                            return File(System.IO.File.ReadAllBytes(imagePath + "excel.png"), "image/png");
                         if (ext == ".ppt" || ext == ".pptx")
-                            return File(System.IO.File.ReadAllBytes(imagePath + "ppt.png"), "application/octet-stream");
+                            return File(System.IO.File.ReadAllBytes(imagePath + "ppt.png"), "image/png");
                         if (new string[] { ".odg", ".ods", ".odp", ".odf", ".odt" }.Contains(ext))
-                            return File(System.IO.File.ReadAllBytes(imagePath + "libreoffice.png"), "application/octet-stream");
+                            return File(System.IO.File.ReadAllBytes(imagePath + "libreoffice.png"), "image/png");
                         if (new string[] { ".wps", ".dps", ".et" }.Contains(ext))
-                            return File(System.IO.File.ReadAllBytes(imagePath + "wps.png"), "application/octet-stream");
-                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "application/octet-stream");
+                            return File(System.IO.File.ReadAllBytes(imagePath + "wps.png"), "image/png");
+                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "image/png");
                     default:
-                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "application/octet-stream");
+                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "image/png");
                 }
             }
-            return File(file["File"].AsByteArray, "application/octet-stream");
+            string contentType = Extension.GetContentType(Path.GetExtension(file["FileName"].AsString.ToLower()).ToLower());
+            return File(file["File"].AsByteArray, contentType);
         }
     }
 }
