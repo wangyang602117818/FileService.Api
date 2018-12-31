@@ -33,7 +33,8 @@ namespace FileService.Api.Controllers
             IEnumerable<BsonDocument> result = filesWrap.GetPageList(pageIndex, pageSize, new BsonDocument("Delete", false), timeStart, timeEnd, sorts, filter, new List<string>() { "FileName" }, new List<string>() { }, out count, User.Identity.Name);
             return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result, count);
         }
-        //[ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        [AllowAnonymous]
         public ActionResult GetFileIcon(string id)
         {
             BsonDocument file = filePreviewMobile.FindOne(ObjectId.Parse(id.Split('.')[0]));

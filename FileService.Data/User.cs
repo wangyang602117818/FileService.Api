@@ -18,6 +18,11 @@ namespace FileService.Data
             var filter = FilterBuilder.Eq("UserName", userName);
             return MongoCollection.Find(filter).FirstOrDefault();
         }
+        public BsonDocument GetUserByOpenId(string openId)
+        {
+            var filter = FilterBuilder.Eq("OpenId", openId);
+            return MongoCollection.Find(filter).FirstOrDefault();
+        }
         public bool UpdateUser(string userName, BsonDocument document)
         {
             var filter = FilterBuilder.Eq("UserName", userName); 

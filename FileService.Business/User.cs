@@ -18,6 +18,10 @@ namespace FileService.Business
         {
             return mongoData.GetUser(userName);
         }
+        public BsonDocument GetUserByOpenId(string openId)
+        {
+            return mongoData.GetUserByOpenId(openId);
+        }
         public bool UpdateUser(string userName, BsonDocument document)
         {
             return mongoData.UpdateUser(userName, document);

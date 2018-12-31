@@ -87,7 +87,7 @@ namespace FileService.Api
                 if (context.Error == "invalid_token")
                 {
                     context.HandleResponse();
-                    var response = new ResponseItem<string>(ErrorCode.invalid_token, context.ErrorDescription);
+                    var response = new ResponseItem<string>(ErrorCode.unauthorized, context.ErrorDescription);
                     context.Response.ContentType = "application/json";
                     return context.Response.WriteAsync(JsonSerializerHelper.Serialize(response));
                 }
@@ -95,8 +95,8 @@ namespace FileService.Api
             };
             options.Events.OnMessageReceived = context =>
             {
-                string query_token = context.Request.Query["auth_token"];
-                string cookies_token = context.Request.Cookies["auth_token"];
+                string query_token = context.Request.Query["access_token"];
+                string cookies_token = context.Request.Cookies["access_token"];
                 string header_token = context.Request.Headers["Authorization"];
                 if (!string.IsNullOrEmpty(header_token))
                 {
@@ -110,6 +110,7 @@ namespace FileService.Api
                 {
                     context.Token = cookies_token;
                 }
+                if (context.Token == null) context.Token = "none";
                 return Task.CompletedTask;
             };
         }

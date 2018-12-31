@@ -12,7 +12,7 @@ using MongoDB.Bson;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]/[action]/{id?}")]
     [ApiController]
     [Authorize]
     public class DownloadController : BaseController

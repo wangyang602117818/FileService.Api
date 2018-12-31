@@ -13,7 +13,8 @@
         invalid_token = 402,
         invalid_username_or_password = 203,
 
-
+        invalid_code = 530,
+        invalid_authcode = 531,
         server_exception = -1000
     }
 }

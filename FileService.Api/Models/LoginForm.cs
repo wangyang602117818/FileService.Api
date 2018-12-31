@@ -14,5 +14,19 @@ namespace FileService.Api.Models
         public string UserName { get; set; }
         [Required]
         public string PassWord { get; set; }
+        [Required]
+        public string AuthCode { get; set; }
+        [Required]
+        public string ApiType { get; set; }
+        public string Code { get; set; }
+    }
+    public class WeChatLoginForm
+    {
+        [Required]
+        public string Code { get; set; }
+        [Required]
+        public string AuthCode { get; set; }
+        [Required]
+        public string ApiType { get; set; }
     }
 }

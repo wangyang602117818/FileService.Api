@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver.GridFS;
+using System.Linq;
 
 namespace FileService.Api.Controllers
 {
@@ -31,25 +32,31 @@ namespace FileService.Api.Controllers
         }
         protected void Log(string fileId, string content)
         {
-            var authCode = Request.Headers["AuthCode"];
-            var appName = Request.Headers["AppName"];
-            string apiType = Request.Headers["ApiType"];
+            var appName = User.Claims.Where(w => w.Type == "AppName").FirstOrDefault().Value;
+            string apiType = User.Claims.Where(w => w.Type == "ApiType").FirstOrDefault().Value;
             string userIp = Request.Headers["UserIp"];
             string userAgent = Request.Headers["UserAgent"];
             string userAgent1 = Request.Headers["User-Agent"];
-
-            if (string.IsNullOrEmpty(appName) && !string.IsNullOrEmpty(authCode))
-            {
-                appName = new Application().FindByAuthCode(authCode)["ApplicationName"].AsString;
-            }
-            log.Insert(appName, fileId, content, User.Identity.Name,
-                apiType ?? "",
+            log.Insert(appName, fileId, content,
+                User.Identity.Name,
+                apiType,
+                userIp ?? HttpContext.Connection.RemoteIpAddress.ToString(),
+                userAgent ?? userAgent1);
+        }
+        protected void LogInRecord(string content, string appName, string userName, string apiType)
+        {
+            string userIp = Request.Headers["UserIp"];
+            string userAgent = Request.Headers["UserAgent"];
+            string userAgent1 = Request.Headers["User-Agent"];
+            log.Insert(appName, "-", content,
+                userName,
+                apiType,
                 userIp ?? HttpContext.Connection.RemoteIpAddress.ToString(),
                 userAgent ?? userAgent1);
         }
         protected void AddDownload(ObjectId fileWrapId)
         {
-            string appName = Request.Headers["AppName"];
+            var appName = User.Claims.Where(w => w.Type == "AppName").FirstOrDefault().Value;
             string userIp = Request.Headers["UserIp"];
             string userAgent = Request.Headers["UserAgent"];
             string userAgent1 = Request.Headers["User-Agent"];
