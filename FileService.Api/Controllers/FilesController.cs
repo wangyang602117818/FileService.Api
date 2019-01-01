@@ -33,6 +33,11 @@ namespace FileService.Api.Controllers
             IEnumerable<BsonDocument> result = filesWrap.GetPageList(pageIndex, pageSize, new BsonDocument("Delete", false), timeStart, timeEnd, sorts, filter, new List<string>() { "FileName" }, new List<string>() { }, out count, User.Identity.Name);
             return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result, count);
         }
+        public IActionResult GetExtensions()
+        {
+            IEnumerable<BsonDocument> result = extension.FindAll();
+            return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result);
+        }
         [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
         [AllowAnonymous]
         public ActionResult GetFileIcon(string id)
