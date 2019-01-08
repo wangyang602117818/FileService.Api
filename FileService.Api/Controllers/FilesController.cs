@@ -24,13 +24,16 @@ namespace FileService.Api.Controllers
         {
             _hostingEnvironment = hostingEnvironment;
         }
-        public IActionResult GetFiles(int pageIndex = 1, int pageSize = 10, string orderField = "CreateTime", string orderFieldType = "desc", string filter = "", string startTime = null, string endTime = null)
+        public IActionResult GetFiles(int pageIndex = 1, int pageSize = 10, string from = "", string orderField = "CreateTime", string orderFieldType = "desc", string filter = "", string fileType = "", string startTime = null, string endTime = null)
         {
             long count = 0;
             DateTime.TryParse(startTime, out DateTime timeStart);
             DateTime.TryParse(endTime, out DateTime timeEnd);
             Dictionary<string, string> sorts = new Dictionary<string, string> { { orderField, orderFieldType } };
-            IEnumerable<BsonDocument> result = filesWrap.GetPageList(pageIndex, pageSize, new BsonDocument("Delete", false), timeStart, timeEnd, sorts, filter, new List<string>() { "FileName" }, new List<string>() { }, out count, User.Identity.Name);
+            BsonDocument eqs = new BsonDocument("Delete", false);
+            if (!string.IsNullOrEmpty(fileType)) eqs.Add("FileType", fileType);
+            if (!string.IsNullOrEmpty(from)) eqs.Add("From", from);
+            IEnumerable<BsonDocument> result = filesWrap.GetPageList(pageIndex, pageSize, eqs, timeStart, timeEnd, sorts, filter, new List<string>() { "FileName" }, new List<string>() { }, out count, User.Identity.Name);
             return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result, count);
         }
         public IActionResult GetExtensions()
