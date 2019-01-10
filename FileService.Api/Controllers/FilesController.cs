@@ -14,9 +14,8 @@ namespace FileService.Api.Controllers
     [Route("api/[controller]/[action]/{id?}")]
     [ApiController]
     [Authorize]
-    public class FilesController : ControllerBase
+    public class FilesController : BaseController
     {
-        FilesWrap filesWrap = new FilesWrap();
         FilePreviewMobile filePreviewMobile = new FilePreviewMobile();
         Extension extension = new Extension();
         private readonly IHostingEnvironment _hostingEnvironment;

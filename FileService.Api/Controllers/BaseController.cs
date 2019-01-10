@@ -14,6 +14,8 @@ namespace FileService.Api.Controllers
         protected Download download = new Download();
         protected FilesWrap filesWrap = new FilesWrap();
         protected Application application = new Application();
+        protected Queue queue = new Queue();
+        protected Converter converter = new Converter();
         protected ActionResult GetSourceFile(ObjectId id, string contentType, string fileName)
         {
             GridFSDownloadStream stream = mongoFile.DownLoad(id);

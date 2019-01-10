@@ -8,14 +8,12 @@ using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Net;
 using System.Security.Claims;
 using System.Text;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]/[action]/{id?}")]
     [ApiController]
     public class HomeController : BaseController
     {
@@ -29,6 +27,7 @@ namespace FileService.Api.Controllers
         {
             BsonDocument bsonUser = user.Login(loginForm.UserName, loginForm.PassWord);
             if (bsonUser == null) return new ResponseItem<string>(ErrorCode.invalid_username_or_password, "");
+            string userId = bsonUser["_id"].ToString();
             string userName = bsonUser["UserName"].AsString;
             string role = bsonUser["Role"].AsString;
             BsonDocument app = application.FindByAuthCode(loginForm.AuthCode);
@@ -40,10 +39,9 @@ namespace FileService.Api.Controllers
                 user.UpdateUser(userName, new BsonDocument("OpenId", openId));
             }
             LogInRecord("Login", appName, userName, loginForm.ApiType);
-            return new ResponseItem<string>(ErrorCode.success, GetToken(userName, appName, loginForm.ApiType, role));
+            return new ResponseItem<string>(ErrorCode.success, GetToken(userId, userName, appName, loginForm.ApiType, role));
         }
         [Authorize]
-        [HttpGet]
         public ResponseItem<string> LogOut()
         {
             if (user.UpdateUser(User.Identity.Name, new BsonDocument("OpenId", "")))
@@ -52,6 +50,15 @@ namespace FileService.Api.Controllers
                 return new ResponseItem<string>(ErrorCode.success, "");
             }
             return new ResponseItem<string>(ErrorCode.server_exception, "");
+        }
+        [Authorize]
+        public IActionResult GetUser(string id)
+        {
+            ObjectId userId = GetObjectIdFromId(id);
+            if (userId == ObjectId.Empty) return new ResponseModel<string>(ErrorCode.record_not_exist, "");
+            BsonDocument userBson = user.FindOne(userId);
+            userBson.Remove("PassWord");
+            return new ResponseModel<BsonDocument>(ErrorCode.success, userBson);
         }
         [HttpPost]
         public ResponseItem<string> WeChatLogin(WeChatLoginForm weChatLogin)
@@ -63,20 +70,22 @@ namespace FileService.Api.Controllers
             {
                 BsonDocument bsonUser = user.GetUserByOpenId(openId);
                 if (bsonUser == null) return new ResponseItem<string>(ErrorCode.invalid_code, "");
+                string userId = bsonUser["_id"].ToString();
                 string userName = bsonUser["UserName"].AsString;
                 string role = bsonUser["Role"].AsString;
                 string appName = app["ApplicationName"].AsString;
                 LogInRecord("Login", appName, userName, weChatLogin.ApiType);
-                return new ResponseItem<string>(ErrorCode.success, GetToken(userName, appName, weChatLogin.ApiType, role));
+                return new ResponseItem<string>(ErrorCode.success, GetToken(userId, userName, appName, weChatLogin.ApiType, role));
             }
             else
             {
                 return new ResponseItem<string>(ErrorCode.invalid_code, "");
             }
         }
-        private string GetToken(string userName, string appName, string apiType, params string[] roles)
+        private string GetToken(string userId, string userName, string appName, string apiType, params string[] roles)
         {
             var claims = new List<Claim>() {
+                new Claim("UserId",userId),
                 new Claim(ClaimTypes.Name, userName),
                 new Claim("AppName",appName),
                 new Claim("ApiType",apiType)
