@@ -2,6 +2,7 @@
 using FileService.Model;
 using FileService.Util;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using System;
@@ -15,6 +16,7 @@ namespace FileService.Api.Controllers
     public class TaskController : BaseController
     {
         Business.Task task = new Business.Task();
+        public TaskController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
         public IActionResult GetTasks(int pageIndex = 1, int pageSize = 10, string from = "", string orderField = "CreateTime", string orderFieldType = "desc", string filter = "", string startTime = null, string endTime = null)
         {
             long count = 0;

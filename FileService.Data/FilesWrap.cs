@@ -14,6 +14,11 @@ namespace FileService.Data
             var filter = FilterBuilder.Eq("Delete", false);
             return MongoCollection.CountDocuments(filter);
         }
+        public long CountDeleted()
+        {
+            var filter = FilterBuilder.Eq("Delete", true);
+            return MongoCollection.CountDocuments(filter);
+        }
         public long CountByFileId(ObjectId fileId)
         {
             var filter = FilterBuilder.Eq("FileId", fileId);

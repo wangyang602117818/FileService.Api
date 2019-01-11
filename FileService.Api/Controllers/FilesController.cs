@@ -17,12 +17,8 @@ namespace FileService.Api.Controllers
     public class FilesController : BaseController
     {
         FilePreviewMobile filePreviewMobile = new FilePreviewMobile();
-        Extension extension = new Extension();
-        private readonly IHostingEnvironment _hostingEnvironment;
-        public FilesController(IHostingEnvironment hostingEnvironment)
-        {
-            _hostingEnvironment = hostingEnvironment;
-        }
+        FilePreview filePreview = new FilePreview();
+        public FilesController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
         public IActionResult GetFiles(int pageIndex = 1, int pageSize = 10, string from = "", string orderField = "CreateTime", string orderFieldType = "desc", string filter = "", string fileType = "", string startTime = null, string endTime = null)
         {
             long count = 0;
@@ -40,43 +36,21 @@ namespace FileService.Api.Controllers
             IEnumerable<BsonDocument> result = extension.FindAll();
             return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result);
         }
-        [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        //[ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
         [AllowAnonymous]
-        public ActionResult GetFileIcon(string id)
+        public IActionResult GetFileIconMobile(string id)
         {
-            BsonDocument file = filePreviewMobile.FindOne(ObjectId.Parse(id.Split('.')[0]));
-            string imagePath = _hostingEnvironment.WebRootPath + "\\images\\";
             string ext = "." + id.Split('.')[1].TrimEnd('/').ToLower();
-            if (file == null)
-            {
-                string type = extension.GetTypeByExtension(ext).ToLower();
-                switch (type)
-                {
-                    case "text":
-                    case "video":
-                    case "image":
-                    case "attachment":
-                    case "audio":
-                    case "pdf":
-                        return File(System.IO.File.ReadAllBytes(imagePath + type + ".png"), "image/png");
-                    case "office":
-                        if (ext == ".doc" || ext == ".docx")
-                            return File(System.IO.File.ReadAllBytes(imagePath + "word.png"), "image/png");
-                        if (ext == ".xls" || ext == ".xlsx")
-                            return File(System.IO.File.ReadAllBytes(imagePath + "excel.png"), "image/png");
-                        if (ext == ".ppt" || ext == ".pptx")
-                            return File(System.IO.File.ReadAllBytes(imagePath + "ppt.png"), "image/png");
-                        if (new string[] { ".odg", ".ods", ".odp", ".odf", ".odt" }.Contains(ext))
-                            return File(System.IO.File.ReadAllBytes(imagePath + "libreoffice.png"), "image/png");
-                        if (new string[] { ".wps", ".dps", ".et" }.Contains(ext))
-                            return File(System.IO.File.ReadAllBytes(imagePath + "wps.png"), "image/png");
-                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "image/png");
-                    default:
-                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "image/png");
-                }
-            }
-            string contentType = Extension.GetContentType(Path.GetExtension(file["FileName"].AsString.ToLower()).ToLower());
-            return File(file["File"].AsByteArray, contentType);
+            BsonDocument file = filePreviewMobile.FindOne(ObjectId.Parse(id.Split('.')[0]));
+            return GetIcon(file, ext);
+        }
+        //[ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        [AllowAnonymous]
+        public IActionResult GetFileIcon(string id)
+        {
+            string ext = "." + id.Split('.')[1].TrimEnd('/').ToLower();
+            BsonDocument file = filePreview.FindOne(ObjectId.Parse(id.Split('.')[0]));
+            return GetIcon(file, ext);
         }
     }
 }

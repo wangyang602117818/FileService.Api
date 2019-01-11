@@ -11,6 +11,10 @@ namespace FileService.Business
         {
             return mongoData.CountByFileId(fileId);
         }
+        public long CountDeleted()
+        {
+            return mongoData.CountDeleted();
+        }
         public void InsertImage(ObjectId id, ObjectId fileId, string fileName, long length, string from, int downloads, string contentType, BsonArray thumbnail, BsonArray access, string owner)
         {
             BsonDocument filesWrap = new BsonDocument()

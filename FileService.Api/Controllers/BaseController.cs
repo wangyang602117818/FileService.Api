@@ -1,7 +1,9 @@
 ﻿using FileService.Business;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver.GridFS;
+using System.IO;
 using System.Linq;
 
 namespace FileService.Api.Controllers
@@ -16,6 +18,13 @@ namespace FileService.Api.Controllers
         protected Application application = new Application();
         protected Queue queue = new Queue();
         protected Converter converter = new Converter();
+        protected Extension extension = new Extension();
+        protected Department department = new Department();
+        private readonly IHostingEnvironment _hostingEnvironment;
+        public BaseController(IHostingEnvironment hostingEnvironment)
+        {
+            _hostingEnvironment = hostingEnvironment;
+        }
         protected ActionResult GetSourceFile(ObjectId id, string contentType, string fileName)
         {
             GridFSDownloadStream stream = mongoFile.DownLoad(id);
@@ -69,6 +78,40 @@ namespace FileService.Api.Controllers
                     userAgent ?? userAgent1);
                 filesWrap.AddDownloads(fileWrapId);
             }
+        }
+        protected IActionResult GetIcon(BsonDocument file,string ext)
+        {
+            string imagePath = _hostingEnvironment.WebRootPath + "\\images\\";
+            if (file == null)
+            {
+                string type = extension.GetTypeByExtension(ext).ToLower();
+                switch (type)
+                {
+                    case "text":
+                    case "video":
+                    case "image":
+                    case "attachment":
+                    case "audio":
+                    case "pdf":
+                        return File(System.IO.File.ReadAllBytes(imagePath + type + ".png"), "image/png");
+                    case "office":
+                        if (ext == ".doc" || ext == ".docx")
+                            return File(System.IO.File.ReadAllBytes(imagePath + "word.png"), "image/png");
+                        if (ext == ".xls" || ext == ".xlsx")
+                            return File(System.IO.File.ReadAllBytes(imagePath + "excel.png"), "image/png");
+                        if (ext == ".ppt" || ext == ".pptx")
+                            return File(System.IO.File.ReadAllBytes(imagePath + "ppt.png"), "image/png");
+                        if (new string[] { ".odg", ".ods", ".odp", ".odf", ".odt" }.Contains(ext))
+                            return File(System.IO.File.ReadAllBytes(imagePath + "libreoffice.png"), "image/png");
+                        if (new string[] { ".wps", ".dps", ".et" }.Contains(ext))
+                            return File(System.IO.File.ReadAllBytes(imagePath + "wps.png"), "image/png");
+                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "image/png");
+                    default:
+                        return File(System.IO.File.ReadAllBytes(imagePath + "attachment.png"), "image/png");
+                }
+            }
+            string contentType = Extension.GetContentType(Path.GetExtension(file["FileName"].AsString.ToLower()).ToLower());
+            return File(file["File"].AsByteArray, contentType);
         }
     }
 }

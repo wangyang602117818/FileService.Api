@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FileService.Business;
 using FileService.Util;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -17,6 +18,7 @@ namespace FileService.Api.Controllers
     [Authorize]
     public class DownloadController : BaseController
     {
+        public DownloadController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
         public IActionResult Get(string id, bool deleted = false)
         {
             ObjectId fileWrapId = GetObjectIdFromId(id);

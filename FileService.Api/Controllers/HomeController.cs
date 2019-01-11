@@ -2,6 +2,7 @@
 using FileService.Business;
 using FileService.Util;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using MongoDB.Bson;
@@ -18,6 +19,7 @@ namespace FileService.Api.Controllers
     public class HomeController : BaseController
     {
         User user = new User();
+        public HomeController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
         public ResponseItem<string> Index()
         {
             return new ResponseItem<string>(ErrorCode.success, "file servivce api home page");
@@ -41,25 +43,6 @@ namespace FileService.Api.Controllers
             LogInRecord("Login", appName, userName, loginForm.ApiType);
             return new ResponseItem<string>(ErrorCode.success, GetToken(userId, userName, appName, loginForm.ApiType, role));
         }
-        [Authorize]
-        public ResponseItem<string> LogOut()
-        {
-            if (user.UpdateUser(User.Identity.Name, new BsonDocument("OpenId", "")))
-            {
-                Log("-", "LogOut");
-                return new ResponseItem<string>(ErrorCode.success, "");
-            }
-            return new ResponseItem<string>(ErrorCode.server_exception, "");
-        }
-        [Authorize]
-        public IActionResult GetUser(string id)
-        {
-            ObjectId userId = GetObjectIdFromId(id);
-            if (userId == ObjectId.Empty) return new ResponseModel<string>(ErrorCode.record_not_exist, "");
-            BsonDocument userBson = user.FindOne(userId);
-            userBson.Remove("PassWord");
-            return new ResponseModel<BsonDocument>(ErrorCode.success, userBson);
-        }
         [HttpPost]
         public ResponseItem<string> WeChatLogin(WeChatLoginForm weChatLogin)
         {
@@ -80,6 +63,56 @@ namespace FileService.Api.Controllers
             else
             {
                 return new ResponseItem<string>(ErrorCode.invalid_code, "");
+            }
+        }
+        [Authorize]
+        public ResponseItem<string> LogOut()
+        {
+            if (user.UpdateUser(User.Identity.Name, new BsonDocument("OpenId", "")))
+            {
+                Log("-", "LogOut");
+                return new ResponseItem<string>(ErrorCode.success, "");
+            }
+            return new ResponseItem<string>(ErrorCode.server_exception, "");
+        }
+        [Authorize]
+        public IActionResult GetUser(string id)
+        {
+            ObjectId userId = GetObjectIdFromId(id);
+            if (userId == ObjectId.Empty) return new ResponseModel<string>(ErrorCode.record_not_exist, "");
+            BsonDocument userBson = user.FindOne(userId);
+            userBson.Remove("PassWord");
+            return new ResponseModel<BsonDocument>(ErrorCode.success, userBson);
+        }
+        [Authorize]
+        public IActionResult GetCount()
+        {
+            Dictionary<string, long> result = new Dictionary<string, long>();
+            result.Add("recyle", filesWrap.CountDeleted());
+            result.Add("log", log.Count());
+            result.Add("extension", extension.Count());
+            result.Add("application", application.Count());
+            result.Add("user", user.Count());
+            result.Add("company", department.Count());
+            return new ResponseModel<Dictionary<string, long>>(ErrorCode.success, result);
+        }
+        [Authorize]
+        public IActionResult ChangePassword(string password)
+        {
+            BsonDocument userBson = new BsonDocument()
+            {
+                {"PassWord",password.ToMD5() },
+                {"Modified",true },
+                {"OpenId","" },
+                {"UpdateTime",DateTime.Now }
+            };
+            if (user.UpdateUser(User.Identity.Name, userBson))
+            {
+                return new ResponseModel<string>(ErrorCode.success, "");
+            }
+            else
+            {
+                return new ResponseModel<string>(ErrorCode.server_exception, "");
             }
         }
         private string GetToken(string userId, string userName, string appName, string apiType, params string[] roles)
