@@ -17,4 +17,10 @@
     <ProjectReference Include="..\FileService.Util\FileService.Util.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="template.m3u8">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

@@ -20,6 +20,8 @@ namespace FileService.Api.Controllers
         protected Converter converter = new Converter();
         protected Extension extension = new Extension();
         protected Department department = new Department();
+        protected M3u8 m3u8 = new M3u8();
+        protected Ts ts = new Ts();
         private readonly IHostingEnvironment _hostingEnvironment;
         public BaseController(IHostingEnvironment hostingEnvironment)
         {
