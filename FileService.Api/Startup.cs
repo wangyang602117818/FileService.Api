@@ -43,7 +43,7 @@ namespace FileService.Api
                 {
                     options.Filters.Add(new ValidateModelStateAttribute());
                     options.Filters.Add(new MyHandleErrorAttribute());
-                    options.CacheProfiles.Add("default", new CacheProfile { Duration = 60 * 20, });
+                    options.CacheProfiles.Add("default", new CacheProfile { Duration = 60 * 20 });
                 })
                 .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .ConfigureApiBehaviorOptions(options =>
@@ -60,6 +60,16 @@ namespace FileService.Api
                 app.UseDeveloperExceptionPage();
             }
             app.UseAuthentication();
+            app.Use(async (context, next) =>
+            {
+                await next();
+                if (context.Response.StatusCode == 403)
+                {
+                    var response = new ResponseItem<string>(ErrorCode.forbidden,"");
+                    context.Response.ContentType = "application/json";
+                    await context.Response.WriteAsync(JsonSerializerHelper.Serialize(response));
+                }
+            });
             app.UseCors("CorsPolicy");
             app.UseResponseCaching();
             app.UseMvc(routes =>
@@ -91,6 +101,11 @@ namespace FileService.Api
                     context.Response.ContentType = "application/json";
                     return context.Response.WriteAsync(JsonSerializerHelper.Serialize(response));
                 }
+                return Task.CompletedTask;
+            };
+            options.Events.OnAuthenticationFailed = context =>
+            {
+                var arr = context.Exception;
                 return Task.CompletedTask;
             };
             options.Events.OnMessageReceived = context =>

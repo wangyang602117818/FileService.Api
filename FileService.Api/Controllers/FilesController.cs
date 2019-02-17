@@ -52,5 +52,12 @@ namespace FileService.Api.Controllers
             BsonDocument file = filePreview.FindOne(ObjectId.Parse(id.Split('.')[0]));
             return GetIcon(file, ext);
         }
+        [Authorize(Roles = "admin")]
+        public ActionResult Remove(string id)
+        {
+            RemoveFile(id);
+            Log(id, "RemoveFile");
+            return new ResponseModel<string>(ErrorCode.success, "");
+        }
     }
 }

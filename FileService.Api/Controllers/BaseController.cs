@@ -22,6 +22,7 @@ namespace FileService.Api.Controllers
         protected Department department = new Department();
         protected M3u8 m3u8 = new M3u8();
         protected Ts ts = new Ts();
+        protected Task task = new Task();
         private readonly IHostingEnvironment _hostingEnvironment;
         public BaseController(IHostingEnvironment hostingEnvironment)
         {
@@ -114,6 +115,14 @@ namespace FileService.Api.Controllers
             }
             string contentType = Extension.GetContentType(Path.GetExtension(file["FileName"].AsString.ToLower()).ToLower());
             return File(file["File"].AsByteArray, contentType);
+        }
+        protected void RemoveFile(string id)
+        {
+            ObjectId fileWrapId = ObjectId.Parse(id);
+            BsonDocument fileWrap = filesWrap.FindOne(fileWrapId);
+            if (filesWrap == null) return;
+            task.RemoveByFileId(fileWrapId);
+            filesWrap.Remove(fileWrapId);
         }
     }
 }
