@@ -27,6 +27,13 @@ namespace FileService.Business
         {
             return mongoData.GetByCode(code);
         }
+        public List<DepartmentItem> GetDepartments(string code)
+        {
+            BsonDocument bson = mongoData.GetByCode(code);
+            List<DepartmentItem> result = new List<DepartmentItem>(){};
+            GetSubDepartments(bson["Department"].AsBsonArray, result, 0);
+            return result;
+        }
         public void GetNamesByCodes(string companyCode, string[] departmentCodes, out string companyName, out List<string> departmentNames)
         {
             BsonDocument bson = mongoData.GetByCode(companyCode);
@@ -53,6 +60,19 @@ namespace FileService.Business
                 {
                     GetDictionary(dept["Department"].AsBsonArray, dict);
                 }
+            }
+        }
+        private void GetSubDepartments(BsonArray array, List<DepartmentItem> result, int layer)
+        {
+            foreach (BsonDocument bson in array)
+            {
+                result.Add(new DepartmentItem()
+                {
+                    DepartmentName = bson["DepartmentName"].AsString,
+                    DepartmentCode = bson["DepartmentCode"].AsString,
+                    Layer = layer + 1
+                });
+                GetSubDepartments(bson["Department"].AsBsonArray, result, layer + 1);
             }
         }
         //public BsonDocument GetByDepartmentCode(string departmentCode)

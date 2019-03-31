@@ -36,7 +36,7 @@ namespace FileService.Api.Controllers
             IEnumerable<BsonDocument> result = extension.FindAll();
             return new ResponseModel<IEnumerable<BsonDocument>>(ErrorCode.success, result);
         }
-        //[ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
         [AllowAnonymous]
         public IActionResult GetFileIconMobile(string id)
         {
@@ -44,7 +44,7 @@ namespace FileService.Api.Controllers
             BsonDocument file = filePreviewMobile.FindOne(ObjectId.Parse(id.Split('.')[0]));
             return GetIcon(file, ext);
         }
-        //[ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
+        [ResponseCache(CacheProfileName = "default", VaryByQueryKeys = new string[] { "id" })]
         [AllowAnonymous]
         public IActionResult GetFileIcon(string id)
         {
