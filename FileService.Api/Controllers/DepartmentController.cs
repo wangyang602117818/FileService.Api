@@ -14,7 +14,7 @@ namespace FileService.Api.Controllers
 {
     [Route("api/[controller]/[action]/{id?}")]
     [ApiController]
-    //[Authorize]
+    [Authorize]
     public class DepartmentController : BaseController
     {
         public DepartmentController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }

@@ -23,6 +23,7 @@ namespace FileService.Api.Controllers
         protected M3u8 m3u8 = new M3u8();
         protected Ts ts = new Ts();
         protected Task task = new Task();
+        protected User user = new User();
         private readonly IHostingEnvironment _hostingEnvironment;
         public BaseController(IHostingEnvironment hostingEnvironment)
         {
