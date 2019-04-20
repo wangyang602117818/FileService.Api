@@ -19,7 +19,7 @@
     },
     "FileService.Api": {
       "commandName": "Project",
-      "launchBrowser": true,
+      "launchBrowser": false,
       "launchUrl": "api/home/index",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

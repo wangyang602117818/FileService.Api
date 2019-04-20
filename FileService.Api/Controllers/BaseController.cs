@@ -58,13 +58,13 @@ namespace FileService.Api.Controllers
                 userIp ?? HttpContext.Connection.RemoteIpAddress.ToString(),
                 userAgent ?? userAgent1);
         }
-        protected void LogInRecord(string content, string appName, string userName, string apiType)
+        protected void LogInRecord(string content, string appName, string userCode, string apiType)
         {
             string userIp = Request.Headers["UserIp"];
             string userAgent = Request.Headers["UserAgent"];
             string userAgent1 = Request.Headers["User-Agent"];
             log.Insert(appName, "-", content,
-                userName,
+                userCode,
                 apiType,
                 userIp ?? HttpContext.Connection.RemoteIpAddress.ToString(),
                 userAgent ?? userAgent1);

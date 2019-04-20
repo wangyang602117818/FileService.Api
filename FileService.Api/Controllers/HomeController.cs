@@ -18,7 +18,6 @@ namespace FileService.Api.Controllers
     [ApiController]
     public class HomeController : BaseController
     {
-        User user = new User();
         public HomeController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
         public ResponseItem<string> Index()
         {
@@ -27,9 +26,9 @@ namespace FileService.Api.Controllers
         [HttpPost]
         public ResponseItem<string> Login(LoginForm loginForm)
         {
-            BsonDocument bsonUser = user.Login(loginForm.UserName, loginForm.PassWord);
+            BsonDocument bsonUser = user.Login(loginForm.UserCode, loginForm.PassWord);
             if (bsonUser == null) return new ResponseItem<string>(ErrorCode.invalid_username_or_password, "");
-            string userId = bsonUser["_id"].ToString();
+            string userCode = bsonUser["UserCode"].ToString();
             string userName = bsonUser["UserName"].AsString;
             string role = bsonUser["Role"].AsString;
             BsonDocument app = application.FindByAuthCode(loginForm.AuthCode);
@@ -38,10 +37,10 @@ namespace FileService.Api.Controllers
             if (!string.IsNullOrEmpty(loginForm.Code))
             {
                 string openId = GetOpenId(loginForm.Code);
-                user.UpdateUser(userName, new BsonDocument("OpenId", openId));
+                user.UpdateUser(userCode, new BsonDocument("OpenId", openId));
             }
             LogInRecord("Login", appName, userName, loginForm.ApiType);
-            return new ResponseItem<string>(ErrorCode.success, GetToken(userId, userName, appName, loginForm.ApiType, role));
+            return new ResponseItem<string>(ErrorCode.success, GetToken(userCode, userName, appName, loginForm.ApiType, role));
         }
         [HttpPost]
         public ResponseItem<string> WeChatLogin(WeChatLoginForm weChatLogin)
@@ -53,12 +52,12 @@ namespace FileService.Api.Controllers
             {
                 BsonDocument bsonUser = user.GetUserByOpenId(openId);
                 if (bsonUser == null) return new ResponseItem<string>(ErrorCode.invalid_code, "");
-                string userId = bsonUser["_id"].ToString();
+                string userCode = bsonUser["UserCode"].ToString();
                 string userName = bsonUser["UserName"].AsString;
                 string role = bsonUser["Role"].AsString;
                 string appName = app["ApplicationName"].AsString;
                 LogInRecord("Login", appName, userName, weChatLogin.ApiType);
-                return new ResponseItem<string>(ErrorCode.success, GetToken(userId, userName, appName, weChatLogin.ApiType, role));
+                return new ResponseItem<string>(ErrorCode.success, GetToken(userCode, userName, appName, weChatLogin.ApiType, role));
             }
             else
             {
@@ -76,11 +75,9 @@ namespace FileService.Api.Controllers
             return new ResponseItem<string>(ErrorCode.server_exception, "");
         }
         [Authorize]
-        public IActionResult GetUser(string id)
+        public IActionResult GetUser(string userCode)
         {
-            ObjectId userId = GetObjectIdFromId(id);
-            if (userId == ObjectId.Empty) return new ResponseModel<string>(ErrorCode.record_not_exist, "");
-            BsonDocument userBson = user.FindOne(userId);
+            BsonDocument userBson = user.GetUser(userCode);
             userBson.Remove("PassWord");
             return new ResponseModel<BsonDocument>(ErrorCode.success, userBson);
         }
@@ -115,11 +112,11 @@ namespace FileService.Api.Controllers
                 return new ResponseModel<string>(ErrorCode.server_exception, "");
             }
         }
-        private string GetToken(string userId, string userName, string appName, string apiType, params string[] roles)
+        private string GetToken(string userCode, string userName, string appName, string apiType, params string[] roles)
         {
             var claims = new List<Claim>() {
-                new Claim("UserId",userId),
-                new Claim(ClaimTypes.Name, userName),
+                new Claim("UserName",userName),
+                new Claim(ClaimTypes.Name, userCode),
                 new Claim("AppName",appName),
                 new Claim("ApiType",apiType)
             };

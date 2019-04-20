@@ -159,8 +159,8 @@ namespace FileService.Data
             List<FilterDefinition<BsonDocument>> result = new List<FilterDefinition<BsonDocument>>();
             result.Add(filterBuilder);
             if (eqs != null) result.Add(eqs);
-            if (start != null) result.Add(FilterBuilder.Gte("CreateTime", start.Value.AddHours(0).AddMinutes(0).AddSeconds(0)));
-            if (end != null) result.Add(FilterBuilder.Lte("CreateTime", end.Value.AddHours(23).AddMinutes(59).AddSeconds(59)));
+            if (start != null && start != DateTime.MinValue) result.Add(FilterBuilder.Gte("CreateTime", start.Value.AddHours(0).AddMinutes(0).AddSeconds(0)));
+            if (end != null && end != DateTime.MinValue) result.Add(FilterBuilder.Lte("CreateTime", end.Value.AddHours(23).AddMinutes(59).AddSeconds(59)));
             var accessFilter = GetAccessFilter(userName);
             if (accessFilter != null) result.Add(accessFilter);
             var andFilter = GetAndFilter();
