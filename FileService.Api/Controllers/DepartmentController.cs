@@ -12,9 +12,6 @@ using MongoDB.Bson;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]/{id?}")]
-    [ApiController]
-    [Authorize]
     public class DepartmentController : BaseController
     {
         public DepartmentController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }

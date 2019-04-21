@@ -11,9 +11,6 @@ using System.Linq;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]/{id?}")]
-    [ApiController]
-    [Authorize]
     public class FilesController : BaseController
     {
         FilePreviewMobile filePreviewMobile = new FilePreviewMobile();

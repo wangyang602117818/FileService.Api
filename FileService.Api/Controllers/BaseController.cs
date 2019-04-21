@@ -1,4 +1,5 @@
 ﻿using FileService.Business;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -8,6 +9,9 @@ using System.Linq;
 
 namespace FileService.Api.Controllers
 {
+    [Route("api/[controller]/[action]/{id?}")]
+    [ApiController]
+    [Authorize]
     public class BaseController : ControllerBase
     {
         protected Log log = new Log();

@@ -16,9 +16,6 @@ using MongoDB.Driver.GridFS;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]/{id?}")]
-    [ApiController]
-    [Authorize]
     public class DownloadController : BaseController
     {
         static string m3u8Template = System.IO.File.ReadAllText(AppDomain.CurrentDomain.BaseDirectory + "\\template.m3u8");

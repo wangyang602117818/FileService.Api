@@ -14,11 +14,10 @@ using System.Text;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]/{id?}")]
-    [ApiController]
     public class HomeController : BaseController
     {
         public HomeController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
+        [AllowAnonymous]
         public ResponseItem<string> Index()
         {
             return new ResponseItem<string>(ErrorCode.success, "file servivce api home page");
@@ -64,7 +63,6 @@ namespace FileService.Api.Controllers
                 return new ResponseItem<string>(ErrorCode.invalid_code, "");
             }
         }
-        [Authorize]
         public ResponseItem<string> LogOut()
         {
             if (user.UpdateUser(User.Identity.Name, new BsonDocument("OpenId", "")))
@@ -74,14 +72,12 @@ namespace FileService.Api.Controllers
             }
             return new ResponseItem<string>(ErrorCode.server_exception, "");
         }
-        [Authorize]
         public IActionResult GetUser(string userCode)
         {
             BsonDocument userBson = user.GetUser(userCode);
             userBson.Remove("PassWord");
             return new ResponseModel<BsonDocument>(ErrorCode.success, userBson);
         }
-        [Authorize]
         public IActionResult GetCount()
         {
             Dictionary<string, long> result = new Dictionary<string, long>();
@@ -93,7 +89,6 @@ namespace FileService.Api.Controllers
             result.Add("company", department.Count());
             return new ResponseModel<Dictionary<string, long>>(ErrorCode.success, result);
         }
-        [Authorize]
         public IActionResult ChangePassword(string password)
         {
             BsonDocument userBson = new BsonDocument()
@@ -112,6 +107,7 @@ namespace FileService.Api.Controllers
                 return new ResponseModel<string>(ErrorCode.server_exception, "");
             }
         }
+        [AllowAnonymous]
         private string GetToken(string userCode, string userName, string appName, string apiType, params string[] roles)
         {
             var claims = new List<Claim>() {
@@ -133,6 +129,7 @@ namespace FileService.Api.Controllers
             string tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
             return tokenStr;
         }
+        [AllowAnonymous]
         private string GetOpenId(string code)
         {
             string url = AppSettings.Configuration["weChat:openIdUrl"] + "?appid=" + AppSettings.Configuration["weChat:appId"] + "&secret=" + AppSettings.Configuration["weChat:appSecret"] + "&js_code=" + code + "&grant_type=authorization_code";

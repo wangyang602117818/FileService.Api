@@ -11,13 +11,10 @@ using MongoDB.Bson;
 
 namespace FileService.Api.Controllers
 {
-    [Route("api/[controller]/[action]/{id?}")]
-    [ApiController]
-    [Authorize]
     public class UserController : BaseController
     {
         public UserController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
-        public IActionResult GetUsers(string company,int pageIndex = 1, int pageSize = 10, string orderField = "UserName", string orderFieldType = "desc", string filter = "")
+        public IActionResult GetUsers(string company,int pageIndex = 1, int pageSize = 10, string orderField = "UserName", string orderFieldType = "asc", string filter = "")
         {
             long count = 0;
             Dictionary<string, string> sorts = new Dictionary<string, string> { { orderField, orderFieldType } };
