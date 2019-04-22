@@ -1,0 +1,88 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+
+</head>
+<body>
+    <input type="file" name="file" id="file" />
+</body>
+</html>
+<script>
+    function post(url, formData, success, progress, error, userCode, defaultConvert) {
+        var xhr = new XMLHttpRequest();
+        xhr.upload.onprogress = function (event) {
+            var precent = ((event.loaded / event.total) * 100).toFixed();
+            if (progress) progress(precent);
+        }
+        xhr.onload = function (event) {
+            var target = event.srcElement || event.target;
+            if (success) {
+                var result = "";
+                try {
+                    result = JSON.parse(target.responseText);
+                } catch (error) {
+                    result = target.responseText;
+                }
+                success(result);
+            }
+        }
+        xhr.onerror = function (event) {
+            if (error) error(event);
+        }
+        xhr.open('post', url);
+        setXhrHeaders(xhr, userCode, defaultConvert);
+        xhr.send(formData);
+    }
+    function uploadImage(file, imageConvert, userAccess, success, progress, error, userCode) {
+        var url = "http://127.0.0.1:5000/api/upload/attachment";
+        var formData = getFormData("Attachments", file, imageConvert, userAccess);
+        this.post(url, formData, success, progress, error, userCode, false);
+    }
+    function getFormData(name, file, convert, access) {
+        var formData = new FormData();
+        if (file instanceof FileList) {
+            for (var i = 0; i < file.length; i++) formData.append(name, file[i]);
+        } else if (file instanceof File) {
+            formData.append(name, file);
+        } else if (typeof file == "string") {
+            formData.append("FileBase64", file);
+        } else {
+            console.log("not a file...");
+            return;
+        }
+        if (convert) {
+            if (convert instanceof Array) {
+                formData.append("output", JSON.stringify(convert));
+            } else {
+                formData.append("output", JSON.stringify([convert]));
+            }
+        }
+        if (access) {
+            if (access instanceof Array) {
+                formData.append("access", JSON.stringify(access));
+            } else {
+                formData.append("access", JSON.stringify([access]));
+            }
+        }
+        return formData;
+    }
+    function setXhrHeaders(xhr, userCode, defaultConvert) {
+        xhr.setRequestHeader("Authorization", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VyTmFtZSI6InlhbmcgeCB3YW5nIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvbmFtZSI6InlhbmcgeCB3YW5nIiwiQXBwTmFtZSI6Ik1pbmkgUHJvZ3JhbSIsIkFwaVR5cGUiOiJoNSIsImh0dHA6Ly9zY2hlbWFzLm1pY3Jvc29mdC5jb20vd3MvMjAwOC8wNi9pZGVudGl0eS9jbGFpbXMvcm9sZSI6ImFkbWluIiwiZXhwIjoxNTU1OTQ4Nzk5LCJpc3MiOiJodHRwOi8vMTI3LjAuMC4xLyIsImF1ZCI6Imh0dHA6Ly8xMjcuMC4wLjEvIn0.dm61opzXaKmbjZFiYO59IcqnHBbrEFE9r5i-QY-vsKM");
+        if (defaultConvert) xhr.setRequestHeader("DefaultConvert", defaultConvert);
+    }
+    document.getElementById("file").onchange = function () {
+        var files = this.files;
+        uploadImage(files, [{ flag: "pad", format: 0, quality:2}], null,
+            function (data) {
+                console.log(data);
+            },
+            function (percent) {
+                console.log(percent);
+            },
+            null,
+            null,
+        )
+    };
+</script>

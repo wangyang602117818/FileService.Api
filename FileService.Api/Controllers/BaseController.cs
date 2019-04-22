@@ -1,9 +1,13 @@
 ﻿using FileService.Business;
+using FileService.Model;
+using FileService.Util;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver.GridFS;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -28,10 +32,47 @@ namespace FileService.Api.Controllers
         protected Ts ts = new Ts();
         protected Task task = new Task();
         protected User user = new User();
-        private readonly IHostingEnvironment _hostingEnvironment;
+        protected readonly IHostingEnvironment _hostingEnvironment;
         public BaseController(IHostingEnvironment hostingEnvironment)
         {
             _hostingEnvironment = hostingEnvironment;
+        }
+        protected void InsertTask(string handlerId, ObjectId fileId, string fileName, string type, string from, BsonDocument outPut, BsonArray access, string owner)
+        {
+            converter.AddCount(handlerId, 1);
+            ObjectId taskId = ObjectId.GenerateNewId();
+            task.Insert(taskId, fileId, DateTime.Now.ToString("yyyyMMdd"), fileName,
+                type, from, outPut, access, owner, handlerId, 0, TaskStateEnum.wait, 0);
+            //添加队列
+            queue.Insert(handlerId, type, "Task", taskId, false, new BsonDocument());
+        }
+        protected void UpdateTask(ObjectId id, string handlerId, string fileName, string type, int percent, TaskStateEnum state)
+        {
+            converter.AddCount(handlerId, 1);
+            BsonDocument item = new BsonDocument()
+            {
+                {"Folder",DateTime.Now.ToString("yyyyMMdd") },
+                {"FileName",fileName },
+                {"ProcessCount",0 },
+                {"State",state },
+                {"StateDesc",state.ToString() },
+                {"Percent",percent }
+            };
+            task.Update(id, item);
+            queue.Insert(handlerId, type, "Task", id, false, new BsonDocument());
+        }
+        protected void ConvertAccess(List<AccessModel> accessList)
+        {
+            foreach (AccessModel accessModel in accessList)
+            {
+                string companyName = "";
+                List<string> departmentDisplay = new List<string>() { };
+                accessModel.Authority = "0";
+                accessModel.AccessCodes = accessModel.DepartmentCodes;
+                department.GetNamesByCodes(accessModel.Company, accessModel.DepartmentCodes, out companyName, out departmentDisplay);
+                accessModel.CompanyDisplay = companyName;
+                accessModel.DepartmentDisplay = departmentDisplay.ToArray();
+            }
         }
         protected ActionResult GetSourceFile(ObjectId id, string contentType, string fileName)
         {
@@ -42,6 +83,14 @@ namespace FileService.Api.Controllers
         {
             GridFSDownloadStream stream = mongoFileConvert.DownLoad(id);
             return File(stream, stream.FileInfo.Metadata["ContentType"].AsString, stream.FileInfo.Filename);
+        }
+        protected string GetTempFilePath(BsonDocument task)
+        {
+            return AppDomain.CurrentDomain.BaseDirectory + AppSettings.Configuration["tempFileDir"] + task["Folder"].ToString() + "\\" + task["FileId"].ToString() + Path.GetExtension(task["FileName"].ToString());
+        }
+        protected string GetTempFilePath(string folder, string fileId, string fileName)
+        {
+            return AppDomain.CurrentDomain.BaseDirectory + AppSettings.Configuration["tempFileDir"] + folder + "\\" + fileId + Path.GetExtension(fileName);
         }
         protected ObjectId GetObjectIdFromId(string id)
         {
