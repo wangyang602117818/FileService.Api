@@ -275,7 +275,7 @@ namespace FileService.Api.Controllers
             return new ResponseModel<IEnumerable<FileResponse>>(ErrorCode.success, response);
         }
         [HttpPost]
-        public ActionResult VideoCapture([FromForm]UploadVideoCPModel uploadVideoCPModel)
+        public IActionResult VideoCapture([FromForm]UploadVideoCPModel uploadVideoCPModel)
         {
             BsonDocument fileWrap = filesWrap.FindOne(ObjectId.Parse(uploadVideoCPModel.FileId));
             if (fileWrap == null) return new ResponseModel<string>(ErrorCode.record_not_exist, "");
@@ -300,7 +300,7 @@ namespace FileService.Api.Controllers
             return new ResponseModel<string>(ErrorCode.success, id.ToString());
         }
         [HttpPost]
-        public ActionResult VideoCaptureStream([FromForm]UploadVideoCPStreamModel uploadVideoCPStreamModel)
+        public IActionResult VideoCaptureStream([FromForm]UploadVideoCPStreamModel uploadVideoCPStreamModel)
         {
             List<string> response = new List<string>();
             foreach (IFormFile file in uploadVideoCPStreamModel.VideoCPs)
@@ -334,7 +334,7 @@ namespace FileService.Api.Controllers
             return new ResponseModel<List<string>>(ErrorCode.success, response, response.Count);
         }
         [HttpPost]
-        public ActionResult ReplaceFile([FromForm]ReplaceFileModel replaceFileModel)
+        public IActionResult ReplaceFile([FromForm]ReplaceFileModel replaceFileModel)
         {
             Log(replaceFileModel.FileId, "ReplaceFile");
             if (!Directory.Exists(tempFileDirectory))
