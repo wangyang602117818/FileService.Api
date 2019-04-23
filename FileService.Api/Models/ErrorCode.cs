@@ -7,9 +7,11 @@
         redirect = 1,
         invalid_params = 105,
         params_valid_fault = 106,
+        file_type_blocked = 108,
 
         record_not_exist = 200,
         task_not_completed = 204,
+        file_type_not_match = 206,
 
         unauthorized = 401,
 

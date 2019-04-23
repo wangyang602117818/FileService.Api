@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace FileService.Api.Controllers
 {
@@ -19,18 +20,25 @@ namespace FileService.Api.Controllers
     public class BaseController : ControllerBase
     {
         protected Log log = new Log();
-        protected MongoFile mongoFile = new MongoFile();
-        protected MongoFileConvert mongoFileConvert = new MongoFileConvert();
-        protected Download download = new Download();
-        protected FilesWrap filesWrap = new FilesWrap();
-        protected Application application = new Application();
-        protected Queue queue = new Queue();
+        protected Regex regex = new Regex(@"\\(\w+)\\$");
         protected Converter converter = new Converter();
-        protected Extension extension = new Extension();
+        protected Task task = new Task();
+        protected Queue queue = new Queue();
         protected Department department = new Department();
+        protected FilesWrap filesWrap = new FilesWrap();
+        protected Thumbnail thumbnail = new Thumbnail();
         protected M3u8 m3u8 = new M3u8();
         protected Ts ts = new Ts();
-        protected Task task = new Task();
+        protected VideoCapture videoCapture = new VideoCapture();
+        protected FilesConvert filesConvert = new FilesConvert();
+        protected MongoFile mongoFile = new MongoFile();
+        protected MongoFileConvert mongoFileConvert = new MongoFileConvert();
+        protected FilePreview filePreview = new FilePreview();
+        protected FilePreviewMobile filePreviewMobile = new FilePreviewMobile();
+        protected Shared shared = new Shared();
+        protected Download download = new Download();
+        protected Application application = new Application();
+        protected Extension extension = new Extension();
         protected User user = new User();
         protected readonly IHostingEnvironment _hostingEnvironment;
         public BaseController(IHostingEnvironment hostingEnvironment)
@@ -177,6 +185,127 @@ namespace FileService.Api.Controllers
             if (filesWrap == null) return;
             task.RemoveByFileId(fileWrapId);
             filesWrap.Remove(fileWrapId);
+        }
+        protected bool DeleteFile(string id)
+        {
+            Log(id, "DeleteFile");
+            ObjectId fileWrapId = ObjectId.Parse(id);
+            BsonDocument fileWrap = filesWrap.FindOne(fileWrapId);
+            if (fileWrap == null) return false;
+            //删除 thumbnail
+            if (fileWrap["FileType"] == "image" && fileWrap.Contains("Thumbnail"))
+            {
+                List<ObjectId> thumbnailIds = new List<ObjectId>();
+                foreach (BsonDocument d in fileWrap["Thumbnail"].AsBsonArray) thumbnailIds.Add(d["_id"].AsObjectId);
+                thumbnail.DeleteMany(thumbnailIds);
+            }
+            //删除 video 相关
+            if (fileWrap["FileType"] == "video" && fileWrap.Contains("Videos"))
+            {
+                List<ObjectId> m3u8Ids = new List<ObjectId>();
+                List<ObjectId> videoCpIds = new List<ObjectId>();
+                foreach (BsonDocument d in fileWrap["Videos"].AsBsonArray)
+                {
+                    ObjectId fileId = d["_id"].AsObjectId;
+                    if (d["Format"].AsInt32 == 0) m3u8Ids.Add(fileId);
+                };
+                IEnumerable<BsonDocument> m3u8s = m3u8.FindByIds(m3u8Ids);
+                foreach (BsonDocument m3u8 in m3u8s)
+                {
+                    List<ObjectId> tsIds = m3u8["File"].AsString.GetTsIds();
+                    ts.DeleteByIds(m3u8["From"].AsString, m3u8["_id"].AsObjectId, tsIds);
+                }
+                foreach (BsonObjectId oId in fileWrap["VideoCpIds"].AsBsonArray) videoCpIds.Add(oId.AsObjectId);
+                m3u8.DeleteMany(m3u8Ids);
+                videoCapture.DeleteByIds(fileWrap["From"].AsString, videoCpIds);
+            }
+            //删除 attachment 相关
+            if (fileWrap["FileType"] == "office" || fileWrap["FileType"] == "attachment")
+            {
+                foreach (BsonDocument bson in fileWrap["Files"].AsBsonArray)
+                {
+                    if (!bson.Contains("_id")) continue;
+                    if (filesConvert.FindOne(bson["_id"].AsObjectId) != null) mongoFileConvert.Delete(bson["_id"].AsObjectId);
+                }
+                if (fileWrap.Contains("VideoCpIds"))
+                {
+                    videoCapture.DeleteByIds(fileWrap["From"].AsString, fileWrap["VideoCpIds"].AsBsonArray.Select(s => s.AsObjectId));
+                }
+            }
+            //如果源文件没有被引用，则删除
+            if (filesWrap.CountByFileId(fileWrap["FileId"].AsObjectId) == 1 && fileWrap["FileId"].AsObjectId != ObjectId.Empty)
+            {
+                ObjectId fId = fileWrap["FileId"].AsObjectId;
+                mongoFile.Delete(fId);
+                //删除转换的小图标
+                filePreview.DeleteOne(fId);
+                //删除转换的大图标
+                filePreviewMobile.DeleteOne(fId);
+            }
+            //删除缓存文件
+            IEnumerable<BsonDocument> tasks = task.FindCacheFiles(fileWrapId);
+            foreach (BsonDocument task in tasks)
+            {
+                string fullPath = GetTempFilePath(task);
+                if (System.IO.File.Exists(fullPath)) System.IO.File.Delete(fullPath);
+            }
+            //删除共享信息
+            shared.DeleteShared(fileWrapId);
+            task.DeleteByFileId(fileWrapId);
+            filesWrap.DeleteOne(fileWrapId);
+            return true;
+        }
+        protected void DeleteSubFiles(BsonDocument fileWrap)
+        {
+            //删除 thumbnail
+            if (fileWrap["FileType"] == "image" && fileWrap.Contains("Thumbnail"))
+            {
+                List<ObjectId> thumbnailIds = new List<ObjectId>();
+                foreach (BsonDocument d in fileWrap["Thumbnail"].AsBsonArray) thumbnailIds.Add(d["_id"].AsObjectId);
+                thumbnail.DeleteMany(thumbnailIds);
+            }
+            //删除 video 相关
+            if (fileWrap["FileType"] == "video" && fileWrap.Contains("Videos"))
+            {
+                List<ObjectId> m3u8Ids = new List<ObjectId>();
+                List<ObjectId> videoCpIds = new List<ObjectId>();
+                foreach (BsonDocument d in fileWrap["Videos"].AsBsonArray)
+                {
+                    ObjectId fileId = d["_id"].AsObjectId;
+                    if (d["Format"].AsInt32 == 0) m3u8Ids.Add(fileId);
+                }
+                IEnumerable<BsonDocument> m3u8s = m3u8.FindByIds(m3u8Ids);
+                foreach (BsonDocument m3u8 in m3u8s)
+                {
+                    List<ObjectId> tsIds = m3u8["File"].AsString.GetTsIds();
+                    ts.DeleteByIds(m3u8["From"].AsString, m3u8["_id"].AsObjectId, tsIds);
+                }
+                foreach (BsonObjectId oId in fileWrap["VideoCpIds"].AsBsonArray) videoCpIds.Add(oId.AsObjectId);
+                m3u8.DeleteMany(m3u8Ids);
+                videoCapture.DeleteByIds(fileWrap["From"].AsString, videoCpIds);
+            }
+            // 删除 attachment 相关
+            if (fileWrap["FileType"] == "office" || fileWrap["FileType"] == "attachment")
+            {
+                foreach (BsonDocument bson in fileWrap["Files"].AsBsonArray)
+                {
+                    if (!bson.Contains("_id")) continue;
+                    if (filesConvert.FindOne(bson["_id"].AsObjectId) != null) mongoFileConvert.Delete(bson["_id"].AsObjectId);
+                }
+                if (fileWrap.Contains("VideoCpIds"))
+                {
+                    videoCapture.DeleteByIds(fileWrap["From"].AsString, fileWrap["VideoCpIds"].AsBsonArray.Select(s => s.AsObjectId));
+                }
+            }
+            //如果源文件没有被引用，则删除转换的大图标和小图标
+            if (filesWrap.CountByFileId(fileWrap["FileId"].AsObjectId) == 1 && fileWrap["FileId"].AsObjectId != ObjectId.Empty)
+            {
+                ObjectId fId = fileWrap["FileId"].AsObjectId;
+                //删除转换的小图标
+                filePreview.DeleteOne(fId);
+                //删除转换的大图标
+                filePreviewMobile.DeleteOne(fId);
+            }
         }
     }
 }

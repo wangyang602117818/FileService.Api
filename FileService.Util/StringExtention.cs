@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using MongoDB.Bson;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -38,6 +39,21 @@ namespace FileService.Util
             Match match = Regex.Match(str, @"\\\\(.+?)\\");
             return match.Groups[1].Value;
         }
-        
+        public static List<ObjectId> GetTsIds(this string str)
+        {
+            List<ObjectId> tsIds = new List<ObjectId>();
+            var matchs = Regex.Matches(str, "(\\w+).ts");
+            for (var i = 0; i < matchs.Count; i++)
+            {
+                Match match = matchs[i];
+                if (match.Success) tsIds.Add(ObjectId.Parse(match.Groups[1].Value));
+            }
+            return tsIds;
+        }
+        public static string RemoveHtml(this string str)
+        {
+            return Regex.Replace(str, "<[^>]+>", "").Replace("&[^;]+;", "");
+        }
+
     }
 }

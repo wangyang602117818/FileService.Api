@@ -30,4 +30,27 @@ namespace FileService.Api.Models
         public string Access { get; set; }
         public int ExpiredDay { get; set; }
     }
+    public class UploadVideoCPModel
+    {
+        [Required]
+        public string FileId { get; set; }
+        [Required]
+        public string FileBase64 { get; set; }
+    }
+    public class UploadVideoCPStreamModel
+    {
+        [Required]
+        public string FileId { get; set; }
+        [Required]
+        public List<IFormFile> VideoCPs { get; set; }
+    }
+    public class ReplaceFileModel
+    {
+        [Required]
+        public string FileId { get; set; }
+        [Required]
+        public string FileType { get; set; }
+        [Required]
+        public IFormFile File { get; set; }
+    }
 }

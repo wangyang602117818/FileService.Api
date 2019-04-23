@@ -274,5 +274,108 @@ namespace FileService.Api.Controllers
             }
             return new ResponseModel<IEnumerable<FileResponse>>(ErrorCode.success, response);
         }
+        [HttpPost]
+        public ActionResult VideoCapture([FromForm]UploadVideoCPModel uploadVideoCPModel)
+        {
+            BsonDocument fileWrap = filesWrap.FindOne(ObjectId.Parse(uploadVideoCPModel.FileId));
+            if (fileWrap == null) return new ResponseModel<string>(ErrorCode.record_not_exist, "");
+            string[] imageBase64 = uploadVideoCPModel.FileBase64.Split(',');
+            byte[] image = Convert.FromBase64String(Base64SecureURL.Decode(imageBase64.Length >= 2 ? imageBase64[1] : imageBase64[0]));
+            ObjectId id = ObjectId.GenerateNewId();
+            string appName = User.Claims.Where(w => w.Type == "AppName").First().Value;
+            BsonDocument document = new BsonDocument()
+            {
+                {"_id",id },
+                {"From",appName },
+                {"SourceId",ObjectId.Parse(uploadVideoCPModel.FileId) },
+                {"Length",image.Length },
+                {"FileName",Path.GetFileNameWithoutExtension(fileWrap["FileName"].AsString)+".png" },
+                {"File",image },
+                {"CreateTime",DateTime.Now }
+            };
+            videoCapture.Insert(document);
+            filesWrap.AddVideoCapture(ObjectId.Parse(uploadVideoCPModel.FileId), id);
+            //日志
+            Log(uploadVideoCPModel.FileId, "UploadVideoCapture");
+            return new ResponseModel<string>(ErrorCode.success, id.ToString());
+        }
+        [HttpPost]
+        public ActionResult VideoCaptureStream([FromForm]UploadVideoCPStreamModel uploadVideoCPStreamModel)
+        {
+            List<string> response = new List<string>();
+            foreach (IFormFile file in uploadVideoCPStreamModel.VideoCPs)
+            {
+                //过滤不正确的格式
+                string contentType = "";
+                string fileType = "";
+                if (!extension.CheckFileExtension(Path.GetExtension(file.FileName), ref contentType, ref fileType))
+                {
+                    response.Add(ObjectId.Empty.ToString());
+                    continue;
+                }
+                ObjectId id = ObjectId.GenerateNewId();
+                string appName = User.Claims.Where(w => w.Type == "AppName").First().Value;
+                BsonDocument document = new BsonDocument()
+                {
+                    {"_id",id },
+                    {"From",appName },
+                    {"SourceId",ObjectId.Parse(uploadVideoCPStreamModel.FileId) },
+                    {"Length",file.Length },
+                    {"FileName",file.FileName },
+                    {"File",file.OpenReadStream().ToBytes() },
+                    {"CreateTime",DateTime.Now }
+                };
+                videoCapture.InsertOneAsync(document);
+                filesWrap.AddVideoCapture(ObjectId.Parse(uploadVideoCPStreamModel.FileId), id);
+                //日志
+                Log(id.ToString(), "UploadVideoCaptureStream");
+                response.Add(id.ToString());
+            }
+            return new ResponseModel<List<string>>(ErrorCode.success, response, response.Count);
+        }
+        [HttpPost]
+        public ActionResult ReplaceFile([FromForm]ReplaceFileModel replaceFileModel)
+        {
+            Log(replaceFileModel.FileId, "ReplaceFile");
+            if (!Directory.Exists(tempFileDirectory))
+                Directory.CreateDirectory(tempFileDirectory);
+            ObjectId fileId = ObjectId.Parse(replaceFileModel.FileId);
+            string fileExt = Path.GetExtension(replaceFileModel.File.FileName).ToLower();
+            //过滤不正确的格式
+            string contentType = "";
+            string fileType = "";
+            if (!extension.CheckFileExtension(fileExt, ref contentType, ref fileType)) return new ResponseModel<string>(ErrorCode.file_type_blocked, "");
+            BsonDocument fileWrap = filesWrap.FindOne(fileId);
+            string handlerId = converter.GetHandlerId();
+            if (fileWrap["FileType"].AsString == replaceFileModel.FileType)
+            {
+                //删除文件的附加信息
+                DeleteSubFiles(fileWrap);
+                //保存上传的文件到共享目录
+                using (FileStream stream = new FileStream(tempFileDirectory + fileId.ToString() + fileExt, FileMode.Create))
+                {
+                    replaceFileModel.File.CopyTo(stream);
+                }
+
+                if (filesWrap.Update(fileWrap["_id"].AsObjectId, new BsonDocument() {
+                        {"FileName", replaceFileModel.File.FileName },
+                        {"Length",replaceFileModel.File.Length },
+                        {"Download",0 }
+                     }))
+                {
+                    filesWrap.AddHistory(fileWrap["_id"].AsObjectId, fileWrap["FileId"].AsObjectId);
+                }
+                IEnumerable<BsonDocument> list = task.Find(new BsonDocument("FileId", fileId));
+                foreach (BsonDocument item in list)
+                {
+                    UpdateTask(item["_id"].AsObjectId, handlerId, replaceFileModel.File.FileName, item["Type"].AsString, 0, TaskStateEnum.wait);
+                }
+                return new ResponseModel<string>(ErrorCode.success, "");
+            }
+            else
+            {
+                return new ResponseModel<string>(ErrorCode.file_type_not_match, "");
+            }
+        }
     }
 }
