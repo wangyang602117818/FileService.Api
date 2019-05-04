@@ -1,9 +1,11 @@
 ﻿using FileService.Business;
+using FileService.Model;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver.GridFS;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
@@ -120,6 +122,19 @@ namespace FileService.Api.Controllers
             }
             string contentType = Extension.GetContentType(Path.GetExtension(file["FileName"].AsString.ToLower()).ToLower());
             return File(file["File"].AsByteArray, contentType);
+        }
+        protected void ConvertAccess(List<AccessModel> accessList)
+        {
+            foreach (AccessModel accessModel in accessList)
+            {
+                string companyName = "";
+                List<string> departmentDisplay = new List<string>() { };
+                accessModel.Authority = "0";
+                accessModel.AccessCodes = accessModel.DepartmentCodes;
+                department.GetNamesByCodes(accessModel.Company, accessModel.DepartmentCodes, out companyName, out departmentDisplay);
+                accessModel.CompanyDisplay = companyName;
+                accessModel.DepartmentDisplay = departmentDisplay.ToArray();
+            }
         }
         protected void RemoveFile(string id)
         {
