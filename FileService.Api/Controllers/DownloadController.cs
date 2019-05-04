@@ -26,6 +26,10 @@ namespace FileService.Api.Controllers
             if (fileWrapId == ObjectId.Empty) return File(new MemoryStream(), "application/octet-stream");
             BsonDocument fileWrap = deleted ? filesWrap.FindOne(fileWrapId) : filesWrap.FindOneNotDelete(fileWrapId);
             if (fileWrap == null) return File(new MemoryStream(), "application/octet-stream");
+            if (fileWrap.Contains("ExpiredTime") && (fileWrap["CreateTime"].ToUniversalTime() >= fileWrap["ExpiredTime"].ToUniversalTime()))
+            {
+                return GetFileExpired();
+            }
             AddDownload(fileWrapId);
             ObjectId fileId = fileWrap["FileId"].AsObjectId;
             string fileName = fileWrap["FileName"].AsString;
@@ -33,8 +37,8 @@ namespace FileService.Api.Controllers
             Response.Headers.Add("Accept-Ranges", "bytes");
             if (fileId == ObjectId.Empty)
             {
-                string tempFilePath = AppDomain.CurrentDomain.BaseDirectory + AppSettings.Configuration["tempFileDir"] + fileWrap["CreateTime"].ToUniversalTime().ToString("yyyyMMdd") + "\\" + fileName;
-                FileStream fileStream = new FileStream(tempFilePath, FileMode.Open, FileAccess.Read);
+                string relativePath = GetTempFilePath(fileWrap["CreateTime"].ToUniversalTime().ToString("yyyyMMdd"), fileWrap["_id"].ToString(), fileName);
+                Stream fileStream = GetCacheFile(relativePath);
                 return File(fileStream, contentType, fileName);
             }
             else

@@ -15,7 +15,6 @@ namespace FileService.Api.Controllers
 {
     public class UploadController : BaseController
     {
-        string tempFileDirectory = AppDomain.CurrentDomain.BaseDirectory + AppSettings.Configuration["tempFileDir"] + DateTime.Now.ToString("yyyyMMdd") + "\\";
         public UploadController(IHostingEnvironment hostingEnvironment) : base(hostingEnvironment) { }
         [HttpPost]
         public IActionResult Image([FromForm]UploadImgModel uploadImgModel)
@@ -198,8 +197,6 @@ namespace FileService.Api.Controllers
                 accessList = JsonConvert.DeserializeObject<List<AccessModel>>(uploadAttachmentModel.Access);
                 ConvertAccess(accessList);
             }
-            if (!Directory.Exists(tempFileDirectory))
-                Directory.CreateDirectory(tempFileDirectory);
             foreach (IFormFile file in uploadAttachmentModel.Attachments)
             {
                 //初始化参数

@@ -367,6 +367,11 @@ namespace FileService.Api.Controllers
             string contentType = Extension.GetContentType(Path.GetExtension(file["FileName"].AsString.ToLower()).ToLower());
             return File(file["File"].AsByteArray, contentType);
         }
+        protected ActionResult GetFileExpired()
+        {
+            string imagePath = _hostingEnvironment.WebRootPath + "\\images\\";
+            return File(System.IO.File.ReadAllBytes(imagePath + "forbidden.png"), "image/png");
+        }
         protected bool RemoveFile(string id)
         {
             Log(id, "RemoveFile");
