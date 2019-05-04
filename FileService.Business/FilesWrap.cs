@@ -15,7 +15,7 @@ namespace FileService.Business
         {
             return mongoData.CountDeleted();
         }
-        public void InsertImage(ObjectId id, ObjectId fileId, string fileName, long length, string from, int downloads, string contentType, BsonArray thumbnail, BsonArray access, string owner)
+        public void InsertImage(ObjectId id, ObjectId fileId, string fileName, long length, string from, int downloads, string fileType, string contentType, BsonArray thumbnail, BsonArray access, int expiredDay, string owner)
         {
             BsonDocument filesWrap = new BsonDocument()
                 {
@@ -25,18 +25,20 @@ namespace FileService.Business
                     {"Length",length },
                     {"From",from },
                     {"Download",downloads },
-                    {"FileType","image" },
+                    {"FileType",fileType},
                     {"ContentType",contentType },
                     {"Thumbnail",thumbnail },
                     {"Access",access },
                     {"Owner",owner },
                     {"Delete",false },
                     {"DeleteTime",BsonNull.Value },
-                    {"CreateTime",DateTime.Now }
+                    {"CreateTime",DateTime.Now },
+                    {"ExpiredDay",expiredDay },
+                    {"ExpiredTime",expiredDay==0?DateTime.MaxValue.ToUniversalTime(): DateTime.Now.AddDays(expiredDay)}
                 };
             mongoData.Insert(filesWrap);
         }
-        public void InsertVideo(ObjectId id, ObjectId fileId, string fileName, long length, string from, int downloads, string contentType, BsonArray videos, BsonArray access, string owner)
+        public void InsertVideo(ObjectId id, ObjectId fileId, string fileName, long length, string from, int downloads, string fileType, string contentType, BsonArray videos, BsonArray access, int expiredDay, string owner)
         {
             BsonDocument filesWrap = new BsonDocument()
                 {
@@ -46,7 +48,7 @@ namespace FileService.Business
                     {"Length",length },
                     {"From",from },
                     {"Download",downloads },
-                    {"FileType","video" },
+                    {"FileType",fileType },
                     {"ContentType",contentType },
                     {"Videos",videos },
                     {"VideoCpIds",new BsonArray(){ ObjectId.GenerateNewId()} },
@@ -54,11 +56,13 @@ namespace FileService.Business
                     {"Owner",owner },
                     {"Delete",false },
                     {"DeleteTime",BsonNull.Value },
-                    {"CreateTime",DateTime.Now }
+                    {"CreateTime",DateTime.Now },
+                    {"ExpiredDay",expiredDay },
+                    {"ExpiredTime",expiredDay==0?DateTime.MaxValue.ToUniversalTime(): DateTime.Now.AddDays(expiredDay)}
                 };
             mongoData.Insert(filesWrap);
         }
-        public void InsertAttachment(ObjectId id, ObjectId fileId, string fileName, string fileType, long length, string from, int downloads, string contentType, BsonArray files, BsonArray access, string owner)
+        public void InsertAttachment(ObjectId id, ObjectId fileId, string fileName, string fileType, long length, string from, int downloads, string contentType, BsonArray files, BsonArray access, int expiredDay, string owner)
         {
             BsonDocument filesWrap = new BsonDocument()
                 {
@@ -68,17 +72,20 @@ namespace FileService.Business
                     {"Length",length },
                     {"From",from },
                     {"Download",downloads },
-                    {"FileType","attachment" },
+                    {"FileType",fileType},
                     {"ContentType",contentType },
                     {"Files",files },
                 };
             if (fileType == "video") filesWrap.Add("VideoCpIds", new BsonArray() { ObjectId.GenerateNewId() });
+            if (fileType == "image") filesWrap.Add("Thumbnail", new BsonArray() { });
             filesWrap.AddRange(new Dictionary<string, object>{
                 { "Access",access },
                 { "Owner",owner },
                 { "Delete",false },
                 { "DeleteTime",BsonNull.Value },
-                { "CreateTime",DateTime.Now }
+                { "CreateTime",DateTime.Now },
+                { "ExpiredDay",expiredDay },
+                { "ExpiredTime",expiredDay==0?DateTime.MaxValue.ToUniversalTime(): DateTime.Now.AddDays(expiredDay) }
             });
             mongoData.Insert(filesWrap);
         }
@@ -178,6 +185,6 @@ namespace FileService.Business
         {
             return mongoData.GetCountByAppName(startDateTime);
         }
-        
+
     }
 }

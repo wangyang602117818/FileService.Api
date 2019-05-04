@@ -12,28 +12,31 @@ namespace FileService.Business
             Extensions = new Data.Extension().FindAll().ToList();
         }
         public Extension() : base(new Data.Extension()) { }
-        public bool CheckFileExtension(string extension, ref string contentType)
+        public bool CheckFileExtension(string extension, ref string contentType, ref string fileType)
         {
             BsonDocument document = mongoData.FindByExtension(extension);
             if (document == null) return true;
             contentType = document["ContentType"].AsString;
+            fileType = document["Type"].AsString;
             if (document["Action"].AsString.ToLower() == "block") return false;
             return true;
         }
-        public bool CheckFileExtensionVideo(string extension, ref string contentType)
+        public bool CheckFileExtensionVideo(string extension, ref string contentType, ref string fileType)
         {
             BsonDocument document = mongoData.FindByExtension(extension);
             if (document == null) return false;
             contentType = document["ContentType"].AsString;
+            fileType = document["Type"].AsString;
             if (document["Type"].AsString.ToLower() != "video") return false;
             if (document["Action"].AsString.ToLower() == "block") return false;
             return true;
         }
-        public bool CheckFileExtensionImage(string extension, ref string contentType)
+        public bool CheckFileExtensionImage(string extension, ref string contentType, ref string fileType)
         {
             BsonDocument document = mongoData.FindByExtension(extension);
             if (document == null) return false;
             contentType = document["ContentType"].AsString;
+            fileType = document["Type"].AsString;
             if (document["Type"].AsString.ToLower() != "image") return false;
             if (document["Action"].AsString.ToLower() == "block") return false;
             return true;

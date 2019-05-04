@@ -24,7 +24,7 @@ namespace FileService.Api.Controllers
             IEnumerable<BsonDocument> result = task.GetPageList(pageIndex, pageSize, eqs, timeStart, timeEnd, sorts, filter, new List<string>() { "FileName" }, new List<string>() { }, out count, User.Identity.Name);
             foreach (BsonDocument bson in result)
             {
-                string fullPath = AppDomain.CurrentDomain.BaseDirectory + AppSettings.Configuration["tempFileDir"] + bson["Folder"].ToString() + "\\" + bson["FileName"].ToString();
+                string fullPath = GetTempFilePath(bson);
                 if (System.IO.File.Exists(fullPath))
                 {
                     bson.Add("FileExists", true);

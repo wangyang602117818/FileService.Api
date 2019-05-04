@@ -22,6 +22,7 @@ namespace FileService.Api.Controllers
         {
             return new ResponseItem<string>(ErrorCode.success, "file servivce api home page");
         }
+        [AllowAnonymous]
         [HttpPost]
         public ResponseItem<string> Login(LoginForm loginForm)
         {
@@ -41,6 +42,7 @@ namespace FileService.Api.Controllers
             LogInRecord("Login", appName, userName, loginForm.ApiType);
             return new ResponseItem<string>(ErrorCode.success, GetToken(userCode, userName, appName, loginForm.ApiType, role));
         }
+        [AllowAnonymous]
         [HttpPost]
         public ResponseItem<string> WeChatLogin(WeChatLoginForm weChatLogin)
         {
@@ -107,7 +109,6 @@ namespace FileService.Api.Controllers
                 return new ResponseModel<string>(ErrorCode.server_exception, "");
             }
         }
-        [AllowAnonymous]
         private string GetToken(string userCode, string userName, string appName, string apiType, params string[] roles)
         {
             var claims = new List<Claim>() {
@@ -129,7 +130,6 @@ namespace FileService.Api.Controllers
             string tokenStr = new JwtSecurityTokenHandler().WriteToken(token);
             return tokenStr;
         }
-        [AllowAnonymous]
         private string GetOpenId(string code)
         {
             string url = AppSettings.Configuration["weChat:openIdUrl"] + "?appid=" + AppSettings.Configuration["weChat:appId"] + "&secret=" + AppSettings.Configuration["weChat:appSecret"] + "&js_code=" + code + "&grant_type=authorization_code";

@@ -91,6 +91,10 @@ namespace FileService.Business
         {
             return mongoData.GetFilesByAppName();
         }
+        public IEnumerable<BsonDocument> FindCacheFiles(string handlerId)
+        {
+            return mongoData.FindCacheFiles(handlerId);
+        }
         public IEnumerable<BsonDocument> FindCacheFiles()
         {
             return mongoData.FindCacheFiles();

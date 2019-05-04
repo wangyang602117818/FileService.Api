@@ -39,4 +39,10 @@ namespace FileService.Api.Models
             ContentType = "application/json";
         }
     }
+    public class UploadTransforModel<T>
+    {
+        public int code { get; set; }
+        public string message { get; set; }
+        public T result { get; set; }
+    }
 }

@@ -21,6 +21,10 @@ namespace FileService.Business
                 return mongoData.UpdateByHanderId(HandlerId, this.ToBsonDocument());
             }
         }
+        public BsonDocument GetHandler(string handlerId)
+        {
+            return mongoData.FindByHandler(handlerId);
+        }
         public bool UpdateStatesByHanderId(string handlerId, BsonArray array)
         {
             return mongoData.UpdateStatesByHanderId(handlerId, array);
@@ -46,20 +50,19 @@ namespace FileService.Business
         {
             return mongoData.Offline(HandlerId);
         }
-        public string GetHandlerId()
+        public BsonDocument GetHandlerId()
         {
-            string machine = Environment.MachineName;
-            IEnumerable<BsonDocument> all = mongoData.FindAllExistsMachine(machine).OrderBy(o => o["Total"]);
-            if (all.Count() == 0) return "unknown";
-            if (all.Count() == 1) return all.First()["HandlerId"].AsString;
-            IEnumerable<BsonDocument> run = all.Where(sel => sel["State"].AsInt32 >= 0).OrderBy(o => o["State"]).OrderBy(o => o["State"]);
+            IEnumerable<BsonDocument> all = mongoData.FindAll().OrderBy(o => o["Total"]);
+            if (all.Count() == 0) return null;
+            if (all.Count() == 1) return all.First();
+            IEnumerable<BsonDocument> run = all.Where(sel => sel["State"].AsInt32 >= 0).OrderBy(o => o["State"]);
             if (run.Count() == 0)
             {
-                return all.First()["HandlerId"].AsString;
+                return all.First();
             }
             else
             {
-                return run.First()["HandlerId"].AsString;
+                return run.First();
             }
         }
     }
