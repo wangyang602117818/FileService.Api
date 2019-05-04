@@ -26,7 +26,7 @@ namespace FileService.Data
         }
         public BsonDocument Login(string userCode, string password)
         {
-            var filter = FilterBuilder.Eq("UserCode", userCode) & FilterBuilder.Eq("PassWord", password.ToMD5());
+            var filter = FilterBuilder.Eq("UserCode", userCode) & FilterBuilder.Eq("PassWord", password.GetSha256());
             return MongoCollection.Find(filter).FirstOrDefault();
         }
     }

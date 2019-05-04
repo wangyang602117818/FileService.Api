@@ -95,7 +95,7 @@ namespace FileService.Api.Controllers
         {
             BsonDocument userBson = new BsonDocument()
             {
-                {"PassWord",password.ToMD5() },
+                {"PassWord",password.GetSha256() },
                 {"Modified",true },
                 {"OpenId","" },
                 {"UpdateTime",DateTime.Now }
