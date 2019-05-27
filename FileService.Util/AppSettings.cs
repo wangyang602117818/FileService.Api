@@ -24,7 +24,6 @@ namespace FileService.Util
         public Jwt Jwt { get; set; }
         public WeChat WeChat { get; set; }
         public Mognodb Mognodb { get; set; }
-        public string TempFileDir { get; set; }
     }
     public class Jwt
     {
